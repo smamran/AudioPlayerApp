@@ -154,8 +154,26 @@ void MainComponent::paint (juce::Graphics& g)
     else
     {
         g.setColour (juce::Colours::grey);
-        g.setFont (16.0f);
-        g.drawText ("No Audio File Loaded (Press 'O' or click Open)", thumbnailBounds, juce::Justification::centred, true);
+        g.setFont (15.0f);
+        g.drawText ("No Audio File Loaded (Drag & Drop file here, press 'O', or click Open)", thumbnailBounds, juce::Justification::centred, true);
+    }
+
+    // Drag and drop visual feedback overlay
+    if (isDragOver)
+    {
+        g.setColour (juce::Colour (0xee161b22));
+        g.fillRoundedRectangle (thumbnailBounds.toFloat(), 6.0f);
+
+        g.setColour (juce::Colour (0xff00e5ff));
+        juce::Path outline, dashedOutline;
+        outline.addRoundedRectangle (thumbnailBounds.toFloat().reduced (3.0f), 6.0f);
+        float dashes[] = { 8.0f, 4.0f };
+        juce::PathStrokeType (2.0f).createDashedStroke (dashedOutline, outline, dashes, 2);
+        g.fillPath (dashedOutline);
+
+        g.setColour (juce::Colour (0xff00e5ff));
+        g.setFont (juce::FontOptions (18.0f).withStyle ("Bold"));
+        g.drawText ("Drop audio file here to start playing", thumbnailBounds, juce::Justification::centred, true);
     }
 }
 
@@ -217,11 +235,101 @@ void MainComponent::openButtonClicked()
         });
 }
 
+bool MainComponent::isInterestedInFileDrag (const juce::StringArray& files)
+{
+    for (const auto& filePath : files)
+    {
+        juce::File file (filePath);
+        if (file.isDirectory())
+            return true;
+
+        auto ext = file.getFileExtension().toLowerCase();
+        if (ext == ".wav" || ext == ".mp3" || ext == ".flac" || ext == ".aac" ||
+            ext == ".m4a" || ext == ".ogg" || ext == ".aif" || ext == ".aiff" ||
+            ext == ".wma" || formatManager.findFormatForFileExtension (ext) != nullptr)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void MainComponent::fileDragEnter (const juce::StringArray& files, int x, int y)
+{
+    juce::ignoreUnused (files, x, y);
+    isDragOver = true;
+    repaint();
+}
+
+void MainComponent::fileDragMove (const juce::StringArray& files, int x, int y)
+{
+    juce::ignoreUnused (files, x, y);
+    if (! isDragOver)
+    {
+        isDragOver = true;
+        repaint();
+    }
+}
+
+void MainComponent::fileDragExit (const juce::StringArray& files)
+{
+    juce::ignoreUnused (files);
+    isDragOver = false;
+    repaint();
+}
+
+void MainComponent::filesDropped (const juce::StringArray& files, int x, int y)
+{
+    juce::ignoreUnused (x, y);
+    isDragOver = false;
+    repaint();
+    grabKeyboardFocus();
+
+    for (const auto& filePath : files)
+    {
+        juce::File file (filePath);
+        if (file.isDirectory())
+        {
+            auto audioFiles = file.findChildFiles (juce::File::findFiles, false,
+                                                   "*.wav;*.mp3;*.flac;*.aac;*.m4a;*.ogg;*.aif;*.aiff;*.wma");
+            if (! audioFiles.isEmpty())
+            {
+                loadFile (audioFiles[0]);
+                return;
+            }
+        }
+        else if (file.existsAsFile())
+        {
+            auto ext = file.getFileExtension().toLowerCase();
+            if (ext == ".wav" || ext == ".mp3" || ext == ".flac" || ext == ".aac" ||
+                ext == ".m4a" || ext == ".ogg" || ext == ".aif" || ext == ".aiff" ||
+                ext == ".wma" || formatManager.findFormatForFileExtension (ext) != nullptr)
+            {
+                loadFile (file);
+                return;
+            }
+        }
+    }
+
+    // Fallback if none matched extension explicitly: try first existing file
+    if (files.size() > 0)
+    {
+        juce::File fallback (files[0]);
+        if (fallback.existsAsFile())
+            loadFile (fallback);
+    }
+}
+
 void MainComponent::loadFile (const juce::File& file)
 {
     auto* reader = formatManager.createReaderFor (file);
     if (reader != nullptr)
     {
+        transportSource.stop();
+        transportSource.setSource (nullptr);
+
+        lastMediaFolder = file.getParentDirectory();
+
         auto newSource = std::make_unique<juce::AudioFormatReaderSource> (reader, true);
         newSource->setLooping (isLooping);
 
@@ -238,12 +346,12 @@ void MainComponent::loadFile (const juce::File& file)
         playButton.setEnabled (true);
         stopButton.setEnabled (true);
 
-        // 5. when open new file it should auto start playing
+        // When open/dropped new file it should auto start playing
         transportSource.setPosition (0.0);
         transportSource.start();
         changeState (Playing);
 
-        // 1. file name in window title bar: "JUCE Audio Player - <filename>"
+        // File name in window title bar: "JUCE Audio Player - <filename>"
         if (onTitleChange)
             onTitleChange ("JUCE Audio Player - " + file.getFileName());
 

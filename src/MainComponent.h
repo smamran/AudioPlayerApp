@@ -5,7 +5,8 @@
 
 class MainComponent : public juce::AudioAppComponent,
                       public juce::ChangeListener,
-                      public juce::Timer
+                      public juce::Timer,
+                      public juce::FileDragAndDropTarget
 {
 public:
     MainComponent();
@@ -21,6 +22,13 @@ public:
     void resized() override;
     void changeListenerCallback (juce::ChangeBroadcaster* source) override;
     void timerCallback() override;
+
+    // Drag and Drop callbacks
+    bool isInterestedInFileDrag (const juce::StringArray& files) override;
+    void fileDragEnter (const juce::StringArray& files, int x, int y) override;
+    void fileDragMove (const juce::StringArray& files, int x, int y) override;
+    void fileDragExit (const juce::StringArray& files) override;
+    void filesDropped (const juce::StringArray& files, int x, int y) override;
 
     // Keyboard & Mouse interactions
     bool keyPressed (const juce::KeyPress& key) override;
@@ -72,6 +80,9 @@ private:
 
     // Remember last selected directory for media opening
     juce::File lastMediaFolder;
+
+    // Drag and drop state
+    bool isDragOver { false };
 
     // Audio Thumbnail / Waveform
     juce::AudioThumbnailCache thumbnailCache { 50 };

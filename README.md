@@ -10,15 +10,16 @@ A high-performance, modern cross-platform audio player desktop application built
 
 ### Quick Start
 1. Run `JUCE Audio Player.exe` located in `build/AudioPlayerApp_artefacts/Release/`.
-2. Press <kbd>O</kbd> or click **Open File...** to select any audio file.
+2. **Drag & drop** any audio file into the window, or press <kbd>O</kbd> / click **Open File...** to select an audio file.
 3. The selected track **automatically begins playing**, and the application title bar updates to show the loaded file name.
 
 ---
 
 ### Features & Controls Overview
 
+- **Drag & Drop Auto-Play**: Seamlessly drag and drop any supported audio file (or folder) directly onto the application window to load it and start playing immediately, with a responsive visual drop overlay.
 - **Dynamic Window Title**: The active track name appears cleanly in the native window title bar (`JUCE Audio Player - <filename>`) rather than cluttering the playback controls.
-- **Auto-Play on Open**: Selecting a new file immediately loads and starts playback without requiring an extra click on Play.
+- **Auto-Play on Open**: Selecting or dropping a new file immediately loads and starts playback without requiring an extra click on Play.
 - **Smart Folder Memory**: Opening a file remembers your last media directory, so subsequent file selections open straight to your music folder.
 - **Play & Pause Toggle**:
   - Clicking **Play** starts or resumes playback and transitions the button label to **Pause**.
@@ -50,6 +51,7 @@ A high-performance, modern cross-platform audio player desktop application built
 | <kbd>Mouse Wheel Up</kbd> | **Volume Up** | Increases audio volume by `+5%` |
 | <kbd>Mouse Wheel Down</kbd> | **Volume Down** | Decreases audio volume by `-5%` |
 | <kbd>Mouse Click / Drag</kbd> | **Seek / Scrub** | Click or drag on the waveform or seekbar to seek |
+| <kbd>Drag & Drop</kbd> | **Load & Auto-Play** | Drag audio file onto the window to play immediately |
 
 ---
 
