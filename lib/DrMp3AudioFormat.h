@@ -23,46 +23,62 @@ public:
             Reader (juce::InputStream* in, const juce::String& formatName)
                 : juce::AudioFormatReader (in, formatName)
             {
+                if (in == nullptr)
+                    return;
+
+                in->setPosition (0);
                 auto totalSize = in->getTotalLength();
+                if (totalSize <= 0)
+                    return;
+
                 memoryData.ensureSize ((size_t) totalSize);
-                in->read (memoryData.getData(), (int) totalSize);
+                auto bytesRead = in->read (memoryData.getData(), (int) totalSize);
+                if (bytesRead <= 0)
+                    return;
+
+                memoryData.setSize ((size_t) bytesRead);
 
                 if (! drmp3_init_memory (&mp3, memoryData.getData(), memoryData.getSize(), nullptr))
                     return;
 
+                initialized = true;
                 sampleRate = mp3.sampleRate;
                 numChannels = mp3.channels;
                 bitsPerSample = 16;
                 lengthInSamples = (juce::int64) drmp3_get_pcm_frame_count (&mp3);
 
-                // Pre-allocate buffer for chunk decoding (up to 8192 frames)
+                if (lengthInSamples <= 0 && sampleRate > 0)
+                    lengthInSamples = (juce::int64) ((memoryData.getSize() * 8.0 * sampleRate) / 128000.0);
+
                 scratchBuffer.resize (8192 * numChannels);
             }
 
             ~Reader() override
             {
-                drmp3_uninit (&mp3);
+                if (initialized)
+                    drmp3_uninit (&mp3);
             }
 
             bool readSamples (int* const* destChannels, int numDestChannels, int startSampleInDestBuffer,
                               juce::int64 startSampleInFile, int numSamples) override
             {
+                if (destChannels == nullptr || numSamples <= 0)
+                    return true;
+
                 if (startSampleInFile < 0 || startSampleInFile >= lengthInSamples)
                 {
                     for (int ch = 0; ch < numDestChannels; ++ch)
-                        if (destChannels != nullptr && destChannels[ch] != nullptr)
-                            juce::FloatVectorOperations::clear ((float*) destChannels[ch] + startSampleInDestBuffer, numSamples);
+                        if (destChannels[ch] != nullptr)
+                            std::memset (destChannels[ch] + startSampleInDestBuffer, 0, (size_t) numSamples * sizeof (int));
                     return true;
                 }
 
-                // Only seek if JUCE jumped to a non-sequential position (e.g., user scrubbing)
                 if (currentFramePos != startSampleInFile)
                 {
                     drmp3_seek_to_pcm_frame (&mp3, (uint64_t) startSampleInFile);
                     currentFramePos = startSampleInFile;
                 }
 
-                // Resize scratch buffer if needed
                 size_t neededSize = (size_t) numSamples * numChannels;
                 if (scratchBuffer.size() < neededSize)
                     scratchBuffer.resize (neededSize);
@@ -72,7 +88,7 @@ public:
 
                 for (int ch = 0; ch < numDestChannels; ++ch)
                 {
-                    if (destChannels != nullptr && destChannels[ch] != nullptr)
+                    if (destChannels[ch] != nullptr)
                     {
                         auto* dest = destChannels[ch] + startSampleInDestBuffer;
                         int sourceChannel = juce::jmin (ch, (int) numChannels - 1);
@@ -94,14 +110,18 @@ public:
 
         private:
             drmp3 mp3 {};
+            bool initialized { false };
             juce::MemoryBlock memoryData;
             juce::int64 currentFramePos { -1 };
             std::vector<float> scratchBuffer;
         };
 
+        if (sourceStream == nullptr)
+            return nullptr;
+
         std::unique_ptr<Reader> reader (new Reader (sourceStream, getFormatName()));
 
-        if (reader->sampleRate > 0)
+        if (reader->sampleRate > 0 && reader->lengthInSamples > 0)
             return reader.release();
 
         if (deleteStreamIfOpeningFails)

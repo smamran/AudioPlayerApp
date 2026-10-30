@@ -1,0 +1,23 @@
+[
+  {
+    "label": "Build Release",
+    "command": "cmake --build build --config Release",
+    "description": "Compiles the JUCE Audio Player in Release mode",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Run Audio Player",
+    "command": ".\\build\\AudioPlayerApp_artefacts\\Release\\JUCE Audio Player.exe",
+    "description": "Launches the compiled JUCE Audio Player",
+    "use_new_terminal": true,
+    "allow_concurrent_runs": false
+  },
+  {
+    "label": "Clean Build",
+    "command": "cmake --build build --target clean",
+    "description": "Cleans the build directory",
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false
+  }
+]

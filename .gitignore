@@ -1,0 +1,110 @@
+# ==============================================================================
+# Build & Output Directories
+# ==============================================================================
+build/
+build-*/
+bin/
+out/
+cmake-build-*/
+
+# ==============================================================================
+# CMake Generated Files & Dependencies
+# ==============================================================================
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+Makefile
+*.ninja
+*.ninja_deps
+*.ninja_log
+_deps/
+
+# ==============================================================================
+# JUCE Artefacts & Code Generation
+# ==============================================================================
+*_artefacts/
+AudioPlayerApp_artefacts/
+
+# ==============================================================================
+# Compiled Binaries & Object Files
+# ==============================================================================
+*.obj
+*.o
+*.res
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.pdb
+*.ilk
+*.exp
+*.idb
+
+# ==============================================================================
+# IDEs & Editors
+# ==============================================================================
+# JetBrains (CLion / IntelliJ IDEA)
+.idea/shelf/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/contentModel.xml
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.sln.docstates
+*.opensdf
+*.sdf
+Debug/
+Release/
+x64/
+x86/
+
+# Xcode
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+
+# ==============================================================================
+# Operating System & Temporary Files
+# ==============================================================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.directory
+
+# Temporary audio or log files
+*.log
+test_audio/
