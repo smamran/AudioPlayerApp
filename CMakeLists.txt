@@ -6,7 +6,12 @@ project(AudioPlayerApp VERSION 1.0.0)
 # -------------------------------------------------------------
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options(-flto)
-    add_link_options(-fuse-ld=mold -flto)
+    find_program(MOLD_LINKER mold)
+    if (MOLD_LINKER)
+        add_link_options(-fuse-ld=mold -flto)
+    else ()
+        add_link_options(-flto)
+    endif ()
 endif ()
 
 # Release Mode এবং Size Optimization Flags
@@ -25,18 +30,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # -------------------------------------------------------------
 include(FetchContent)
 
-set(FETCHCONTENT_SOURCE_DIR_FAAD2 "${CMAKE_BINARY_DIR}/_deps/faad2-src" CACHE PATH "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 FetchContent_Declare(
     faad2
-    SOURCE_DIR "${CMAKE_BINARY_DIR}/_deps/faad2-src"
+    GIT_REPOSITORY https://github.com/knik0/faad2.git
+    GIT_TAG        2.11.1
 )
-set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(FAAD_BUILD_CLI OFF CACHE BOOL "" FORCE)
-set(BUILD_CLI OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(faad2)
 
