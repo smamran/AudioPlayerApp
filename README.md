@@ -131,6 +131,17 @@ AudioPlayerApp/
 
 #### Build Instructions (Ninja / Clang)
 ```pwsh
+sudo apt update
+sudo apt install -y \
+    libfreetype-dev \
+    libfontconfig1-dev \
+    libasound2-dev \
+    libcurl4-openssl-dev \
+    libgtk-3-dev \
+    libwebkit2gtk-4.0-dev
+```
+
+```pwsh
 # 1. Clone repository with submodules
 git clone --recursive <repository-url>
 cd AudioPlayerApp
