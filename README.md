@@ -130,7 +130,13 @@ AudioPlayerApp/
 - **Windows Media Foundation SDK** (`mfplat.lib`, `mfreadwrite.lib`, `mfuuid.lib` included with Windows SDK)
 
 #### Build Instructions (Ninja / Clang)
+
 ```pwsh
+# 1. In Ubuntu/Debian install dev dependencies.
+git clone --recursive <repository-url>
+cd AudioPlayerApp
+
+# 2. Clone repository with submodules
 sudo apt update
 sudo apt install -y \
     libfreetype-dev \
@@ -139,17 +145,11 @@ sudo apt install -y \
     libcurl4-openssl-dev \
     libgtk-3-dev \
     libwebkit2gtk-4.0-dev
-```
 
-```pwsh
-# 1. Clone repository with submodules
-git clone --recursive <repository-url>
-cd AudioPlayerApp
-
-# 2. Configure with CMake
+# 3. Configure with CMake
 cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
-# 3. Build executable
+# 4. Build executable
 cmake --build build --config Release
 ```
 
